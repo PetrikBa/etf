@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Page() {
   // Stav pro interaktivní kalkulačku
@@ -9,6 +9,38 @@ export default function Page() {
   // Stav pro lead magnet formulář
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // Nový stav na variant v hero sekcii
+  const [variant, setVariant] = useState<'dane' | 'bohatstvo'>('dane');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const v = params.get('variant');
+      if (v === 'bohatstvo') {
+        setVariant('bohatstvo');
+      } else {
+        setVariant('dane');
+      }
+    }
+  }, []);
+
+  // Mapovanie premenných pre nadpisy podľa variantu
+  const headings: Record<
+    'dane' | 'bohatstvo',
+    { h1: string; subtitle: string }
+  > = {
+    dane: {
+      h1: 'Platíte 15 % nebo 35 % z US dividend?',
+      subtitle:
+        'Srovnání VOO, QQQ a SCHD pro české investory. Zjistěte, jak správně uplatnit zamezení dvojímu zdanění a neplatit zbytečné poplatky.',
+    },
+    bohatstvo: {
+      h1: 'VOO vs. QQQ vs. SCHD: Které ETF buduje bohatství nejrychleji?',
+      subtitle:
+        'Porovnali jsme reálné výnosy a poplatky českých investorů za posledních 10 let.',
+    },
+  };
 
   // Zjednodušená simulace výpočtu pro ETF (VOO, QQQ, SCHD)
   // Předpokládaný hrubý roční výnos před poplatky: VOO (9%), QQQ (11%), SCHD (8%)
@@ -56,18 +88,15 @@ export default function Page() {
           
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium mb-6">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            Aktualizované pre rok 2026 • Dáta z SEC & Yahoo Finance
+            Aktualizované pro rok 2026 • Dáta z SEC & Yahoo Finance
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6">
-            Porovnanie TOP 3 US ETF <br className="hidden sm:inline" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">
-              pre českých a slovenských investorov (2026)
-            </span>
+            {headings[variant].h1}
           </h1>
 
           <p className="text-lg sm:text-xl text-slate-400 max-w-3xl mx-auto mb-8 leading-relaxed">
-            VOO vs. QQQ vs. SCHD: Ako na poplatky, 15% zrážkovú daň z dividend (formulár W-8BEN) a časový test / osvobození od daně.
+            {headings[variant].subtitle}
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 text-sm text-slate-400">
