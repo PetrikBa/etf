@@ -1,3 +1,4 @@
+'use client'
 import { useState } from 'react';
 
 export default function Page() {
@@ -11,7 +12,7 @@ export default function Page() {
 
   // Zjednodušená simulace výpočtu pro ETF (VOO, QQQ, SCHD)
   // Předpokládaný hrubý roční výnos před poplatky: VOO (9%), QQQ (11%), SCHD (8%)
-  const calculateReturns = (annualRate, ter) => {
+  const calculateReturns = (annualRate: number, ter: number) => {
     const totalMonths = horizon * 12;
     const netRate = annualRate - ter;
     const monthlyRate = netRate / 100 / 12;
@@ -38,7 +39,7 @@ export default function Page() {
   const qqq = calculateReturns(11.0, 0.20);
   const schd = calculateReturns(8.0, 0.06);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     if (email) {
       setIsSubmitted(true);
@@ -49,7 +50,7 @@ export default function Page() {
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-slate-950">
       
       {/* 1. HERO SECTION */}
-      <header className="relative overflow-hidden border-b border-slate-800/60 bg-gradient-to-b from-slate-900 to-slate-950 py-16 lg:py-24">
+      <header className="relative overflow-hidden border-b border-slate-800/60 bg-gradient-to-b from-slate-900 to-slate-950 pt-6 pb-10 lg:pt-8 lg:pb-14">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-transparent to-transparent pointer-events-none" />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           
