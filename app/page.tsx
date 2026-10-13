@@ -459,6 +459,15 @@ export default function Page() {
           <p className="text-slate-400">
             Upozornenie: Nie je investičným odporučením. Investovanie do cenných papierov prináša riziko straty kapitálu. Minulé výnosy nie sú zárukou budúcich výsledkov.
           </p>
+          {/* Podrobná poznámka k výpočtom podľa legislatívy ČR/SR */}
+          <div className="text-[11px] text-slate-500 mt-2 mb-0 space-y-1">
+            <div>
+              Metodika výpočtu: Kapitálový zisk je oslobodený od dane z príjmov (0 %) na základe splnenia 3-ročného časového testu pre cenné papiere v ČR/SR.
+            </div>
+            <div>
+              Úspora na dani z dividend (W-8BEN): Vyjadruje ročný rozdiel medzi 35 % zrážkovou daňou (bez W-8BEN) a 15 % zmluvnou daňou (s W-8BEN).
+            </div>
+          </div>
           <p className="pt-2 text-slate-400">
             © 2026 ETF Porovnávač. Všetky práva vyhradené.
           </p>
