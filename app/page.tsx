@@ -1,5 +1,16 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+
+// 1. Univerzálna funkcia pre trackovanie eventov (gtag -> fallback konzola)
+function trackEvent(eventName: string, eventData: Record<string, any> = {}) {
+  if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+    (window as any).gtag('event', eventName, eventData);
+  } else {
+    // Fallback - log do konzoly pre vývoj/test
+    // eslint-disable-next-line no-console
+    console.log(`[Analytics][${eventName}]`, eventData);
+  }
+}
 
 export default function Page() {
   // Stav pro interaktivní kalkulačku
@@ -11,70 +22,158 @@ export default function Page() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Nový stav na variant v hero sekcii
-  const [variant, setVariant] = useState<'dane' | 'bohatstvo'>('dane');
+  const [variant, setVariant] = useState<'taxes' | 'wealth'>('taxes');
 
+  // Ref pre jednoduché "run once" sledovanie focusu
+  const formStarted = useRef(false);
+
+  // 2. Sledovanie page_view + variant/referrer
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const v = params.get('variant');
-      if (v === 'bohatstvo') {
-        setVariant('bohatstvo');
-      } else {
-        setVariant('dane');
-      }
+      const variantValue = v === 'wealth' ? 'wealth' : 'taxes';
+      setVariant(variantValue);
+      trackEvent('page_view', {
+        variant: variantValue,
+        referrer: document.referrer || null,
+        path: window.location.pathname + window.location.search,
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Mapovanie premenných pre nadpisy podľa variantu
   const headings: Record<
-    'dane' | 'bohatstvo',
+    'taxes' | 'wealth',
     { h1: string; subtitle: string }
   > = {
-    dane: {
+    taxes: {
       h1: 'Platíte 15 % nebo 35 % z US dividend?',
       subtitle:
         'Srovnání VOO, QQQ a SCHD pro české investory. Zjistěte, jak správně uplatnit zamezení dvojímu zdanění a neplatit zbytečné poplatky.',
     },
-    bohatstvo: {
+    wealth: {
       h1: 'VOO vs. QQQ vs. SCHD: Které ETF buduje bohatství nejrychleji?',
       subtitle:
         'Porovnali jsme reálné výnosy a poplatky českých investorů za posledních 10 let.',
     },
   };
 
-  // Zjednodušená simulace výpočtu pro ETF (VOO, QQQ, SCHD)
-  // Předpokládaný hrubý roční výnos před poplatky: VOO (9%), QQQ (11%), SCHD (8%)
-  const calculateReturns = (annualRate: number, ter: number) => {
+  // 🟩 Nové hodnoty dividendových výnosov (% ročne)
+  const dividendYields: Record<'VOO' | 'QQQ' | 'SCHD', number> = {
+    VOO: 1.3,
+    QQQ: 0.6,
+    SCHD: 3.4,
+  };
+
+  // 🟩 Upravený výpočet podľa časového testu a dividend
+  // TER stále zohľadňuje nákladovosť, ale zdanenie kapitálového zisku = 0
+  // Ročný výnos = capital appreciation + dividend yield
+  // Capital gain je po 3+ rokoch oslobodený od dane
+  // Na dividendách vďaka W-8BEN je rozdiel 20% (35% vs 15%) – treba ukázať CZK úsporu!
+  const calculateReturns = (
+    annualRate: number,
+    ter: number,
+    dividendYield: number
+  ) => {
     const totalMonths = horizon * 12;
-    const netRate = annualRate - ter;
-    const monthlyRate = netRate / 100 / 12;
-    
+    const netAppreciationRate = annualRate - ter; // čistý rast ceny
+    const totalInvested = monthlyInvestment * totalMonths;
+
+    // Výpočet budúcej hodnoty investície (len z capital appreciation)
     let futureValue = 0;
     for (let i = 0; i < totalMonths; i++) {
-      futureValue = (futureValue + monthlyInvestment) * (1 + monthlyRate);
+      futureValue = (futureValue + monthlyInvestment) * (1 + netAppreciationRate / 100 / 12);
     }
-    
-    const totalInvested = monthlyInvestment * totalMonths;
-    const grossProfit = futureValue - totalInvested;
-    // Zohlednění 15% daně z výnosů/dividend (zjednodušeně pro ilustraci)
-    const netProfit = grossProfit * 0.85; 
-    const finalAmount = totalInvested + netProfit;
+
+    // Výpočet čistého zisku (oslobodeného od dane), časový test splnený
+    const netProfit = futureValue - totalInvested;
+
+    // Výpočet dividend za celé obdobie (obe zdanenia: s W-8BEN aj bez W-8BEN)
+    let totalDividends = 0;
+    let dividendsWithTreatyCZK = 0;
+    let dividendsNoTreatyCZK = 0;
+    let monthlyDividendRate = dividendYield / 100 / 12;
+
+    // Priemerný stav majetku každý mesiac (dividenda vyplácaná mesačne z priemernej hodnoty)
+    // Simulujeme linearizovane: každý mesiac pridaný vklad + zhodnotená hodnota
+    let portfolio = 0;
+    for (let i = 0; i < totalMonths; i++) {
+      portfolio = (portfolio + monthlyInvestment) * (1 + netAppreciationRate / 100 / 12);
+      const thisMonthDividend = portfolio * monthlyDividendRate;
+      totalDividends += thisMonthDividend;
+      // S W-8BEN: zdanené 15%
+      dividendsWithTreatyCZK += thisMonthDividend * 0.85;
+      // Bez W-8BEN: zdanené 35%
+      dividendsNoTreatyCZK += thisMonthDividend * 0.65;
+    }
+    // Ročná úspora je úspora na dani z dividend za rok (čiže mesačné portfólio po roku)
+    // Tu zbierame rozdiel medzi 35% a 15% zdanením na vyplatených dividendach
+    let lastYearCZK = 0;
+    let lastYearTreaty = 0;
+    let lastYearNoTreaty = 0;
+    portfolio = 0;
+    for (let i = 0; i < 12; i++) {
+      portfolio = (portfolio + monthlyInvestment) * (1 + netAppreciationRate / 100 / 12);
+      const divVal = portfolio * monthlyDividendRate;
+      lastYearCZK += divVal;
+      lastYearTreaty += divVal * 0.85;
+      lastYearNoTreaty += divVal * 0.65;
+    }
+    const w8benAnnualSavings = lastYearTreaty - lastYearNoTreaty;
 
     return {
-      finalAmount: Math.round(finalAmount),
+      finalAmount: Math.round(futureValue + dividendsWithTreatyCZK),
       totalInvested: Math.round(totalInvested),
-      netProfit: Math.round(netProfit),
+      netProfit: Math.round((futureValue + dividendsWithTreatyCZK) - totalInvested),
+      w8benAnnualSavings: Math.round(w8benAnnualSavings),
     };
   };
 
-  const voo = calculateReturns(9.0, 0.03);
-  const qqq = calculateReturns(11.0, 0.20);
-  const schd = calculateReturns(8.0, 0.06);
+  // 🟩 Pre každé ETF použijeme správny dividendYield
+  const voo = calculateReturns(9.0, 0.03, dividendYields.VOO);
+  const qqq = calculateReturns(11.0, 0.20, dividendYields.QQQ);
+  const schd = calculateReturns(8.0, 0.06, dividendYields.SCHD);
 
-  const handleSubmit = (e: { preventDefault: () => void; }) => {
+  // 3. Sledovanie zmien posuvníkov kalkulačky
+  const handleInvestmentChange = (val: number) => {
+    setMonthlyInvestment(val);
+    trackEvent('calculator_interaction', {
+      type: 'monthly_investment',
+      value: val,
+      horizon,
+      variant,
+    });
+  };
+  const handleHorizonChange = (val: number) => {
+    setHorizon(val);
+    trackEvent('calculator_interaction', {
+      type: 'horizon',
+      value: val,
+      monthlyInvestment,
+      variant,
+    });
+  };
+
+  // 4. Sledovanie začatia formulára (onFocus, len raz)
+  const handleFormStart = () => {
+    if (!formStarted.current) {
+      formStarted.current = true;
+      trackEvent('form_start', { variant });
+    }
+  };
+
+  // 5. Sledovanie generate_lead pri submit
+  const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
     if (email) {
       setIsSubmitted(true);
+      trackEvent('generate_lead', {
+        email,
+        variant,
+        time: new Date().toISOString(),
+      });
     }
   };
 
@@ -135,13 +234,13 @@ export default function Page() {
                 <label className="text-sm font-medium text-slate-300">Mesačná investícia</label>
                 <span className="text-emerald-400 font-bold text-lg">{monthlyInvestment.toLocaleString()} CZK</span>
               </div>
-              <input 
-                type="range" 
-                min="1000" 
-                max="50000" 
+              <input
+                type="range"
+                min="1000"
+                max="50000"
                 step="1000"
                 value={monthlyInvestment}
-                onChange={(e) => setMonthlyInvestment(Number(e.target.value))}
+                onChange={(e) => handleInvestmentChange(Number(e.target.value))}
                 className="w-full accent-emerald-500 bg-slate-800 h-2 rounded-lg cursor-pointer"
               />
               <div className="flex justify-between text-xs text-slate-500">
@@ -157,13 +256,13 @@ export default function Page() {
                 <label className="text-sm font-medium text-slate-300">Investičný horizont</label>
                 <span className="text-emerald-400 font-bold text-lg">{horizon} {horizon === 1 ? 'rok' : horizon < 5 ? 'roky' : 'rokov'}</span>
               </div>
-              <input 
-                type="range" 
-                min="1" 
-                max="30" 
+              <input
+                type="range"
+                min="1"
+                max="30"
                 step="1"
                 value={horizon}
-                onChange={(e) => setHorizon(Number(e.target.value))}
+                onChange={(e) => handleHorizonChange(Number(e.target.value))}
                 className="w-full accent-emerald-500 bg-slate-800 h-2 rounded-lg cursor-pointer"
               />
               <div className="flex justify-between text-xs text-slate-500">
@@ -192,8 +291,14 @@ export default function Page() {
                     <span className="font-medium text-slate-300">{voo.totalInvested.toLocaleString()} CZK</span>
                   </div>
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Čistý zisk (po dani):</span>
+                    <span>Čistý zisk (oslobodené od dane):</span>
                     <span className="font-medium text-emerald-400">+{voo.netProfit.toLocaleString()} CZK</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-slate-400">
+                    <span>Ročná úspora vďaka W-8BEN:</span>
+                    <span className="font-medium text-emerald-300">
+                      +{voo.w8benAnnualSavings.toLocaleString()} CZK/rok
+                    </span>
                   </div>
                 </div>
               </div>
@@ -219,8 +324,14 @@ export default function Page() {
                     <span className="font-medium text-slate-300">{qqq.totalInvested.toLocaleString()} CZK</span>
                   </div>
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Čistý zisk (po dani):</span>
+                    <span>Čistý zisk (oslobodené od dane):</span>
                     <span className="font-medium text-emerald-400">+{qqq.netProfit.toLocaleString()} CZK</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-slate-400">
+                    <span>Ročná úspora vďaka W-8BEN:</span>
+                    <span className="font-medium text-emerald-300">
+                      +{qqq.w8benAnnualSavings.toLocaleString()} CZK/rok
+                    </span>
                   </div>
                 </div>
               </div>
@@ -246,8 +357,14 @@ export default function Page() {
                     <span className="font-medium text-slate-300">{schd.totalInvested.toLocaleString()} CZK</span>
                   </div>
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Čistý zisk (po dani):</span>
+                    <span>Čistý zisk (oslobodené od dane):</span>
                     <span className="font-medium text-emerald-400">+{schd.netProfit.toLocaleString()} CZK</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-slate-400">
+                    <span>Ročná úspora vďaka W-8BEN:</span>
+                    <span className="font-medium text-emerald-300">
+                      +{schd.w8benAnnualSavings.toLocaleString()} CZK/rok
+                    </span>
                   </div>
                 </div>
               </div>
@@ -257,9 +374,7 @@ export default function Page() {
                 <div className="text-xl font-extrabold text-white">{schd.finalAmount.toLocaleString()} CZK</div>
               </div>
             </div>
-
           </div>
-
         </div>
       </section>
 
@@ -286,12 +401,13 @@ export default function Page() {
 
               <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     required
                     placeholder="Váš e-mail (napr. jan@primlad.cz)"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onFocus={handleFormStart}
                     className="flex-1 px-4 py-3.5 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 text-sm"
                   />
                   <button 
