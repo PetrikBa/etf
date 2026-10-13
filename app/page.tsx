@@ -49,14 +49,14 @@ export default function Page() {
     { h1: string; subtitle: string }
   > = {
     taxes: {
-      h1: 'Platíte 15 % nebo 35 % z US dividend?',
+      h1: 'Platíte 15 % nebo 35 % z amerických dividend?',
       subtitle:
-        'Srovnání VOO, QQQ a SCHD pro české investory. Zjistěte, jak správně uplatnit zamezení dvojímu zdanění a neplatit zbytečné poplatky.',
+        'Srovnání VOO, QQQ a SCHD pro české investory. Zjistěte, jak správně využít zamezení dvojímu zdanění a neplatit zbytečné poplatky.',
     },
     wealth: {
       h1: 'VOO vs. QQQ vs. SCHD: Které ETF buduje bohatství nejrychleji?',
       subtitle:
-        'Porovnali jsme reálné výnosy a poplatky českých investorů za posledních 10 let.',
+        'Porovnali jsme reálné zhodnocení a poplatky českých investorů za posledních 10 let.',
     },
   };
 
@@ -187,7 +187,7 @@ export default function Page() {
           
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium mb-6">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            Aktualizované pro rok 2026 • Dáta z SEC & Yahoo Finance
+            Aktualizováno pro rok 2026 • Data z SEC & Yahoo Finance
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6">
@@ -201,29 +201,29 @@ export default function Page() {
           <div className="flex flex-wrap justify-center gap-4 text-sm text-slate-400">
             <div className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-              Nulové vstupné poplatky
+              Žádné vstupní poplatky
             </div>
             <div className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-              Detailná analýza nákladov (TER)
+              Detailní analýza nákladů (TER)
             </div>
             <div className="flex items-center gap-1.5">
               <svg className="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-              Optimalizácia daní
+              Daňová optimalizace
             </div>
           </div>
 
         </div>
       </header>
 
-      {/* 2. INTERAKTIVNA KALKULAČKA DANE A POPLATKOV */}
+      {/* 2. INTERAKTIVNÍ KALKULAČKA DANÍ A POPLATKŮ */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
           
           <div className="mb-8 text-center sm:text-left">
-            <h2 className="text-2xl font-bold text-white mb-2">Interaktívna kalkulačka výnosov</h2>
+            <h2 className="text-2xl font-bold text-white mb-2">Interaktivní kalkulačka výnosů</h2>
             <p className="text-slate-400 text-sm">
-              Porovnajte celkový čistý stav majetku po zohľadnení TER poplatkov a 15% zrážkovej dane (pri podpísanom W-8BEN).
+              Porovnejte celkový čistý stav majetku po zohlednění TER a 15% srážkové daně z dividend (při vyplněném formuláři W-8BEN).
             </p>
           </div>
 
@@ -231,7 +231,7 @@ export default function Page() {
             {/* Slider 1: Měsíční investice */}
             <div className="space-y-3 bg-slate-950/50 p-4 rounded-xl border border-slate-800/80">
               <div className="flex justify-between items-center">
-                <label className="text-sm font-medium text-slate-300">Mesačná investícia</label>
+                <label className="text-sm font-medium text-slate-300">Měsíční investice</label>
                 <span className="text-emerald-400 font-bold text-lg">{monthlyInvestment.toLocaleString()} CZK</span>
               </div>
               <input
@@ -253,8 +253,10 @@ export default function Page() {
             {/* Slider 2: Investiční horizont */}
             <div className="space-y-3 bg-slate-950/50 p-4 rounded-xl border border-slate-800/80">
               <div className="flex justify-between items-center">
-                <label className="text-sm font-medium text-slate-300">Investičný horizont</label>
-                <span className="text-emerald-400 font-bold text-lg">{horizon} {horizon === 1 ? 'rok' : horizon < 5 ? 'roky' : 'rokov'}</span>
+                <label className="text-sm font-medium text-slate-300">Investiční horizont</label>
+                <span className="text-emerald-400 font-bold text-lg">
+                  {horizon} {horizon === 1 ? 'rok' : (horizon >= 2 && horizon <= 4) ? 'roky' : 'let'}
+                </span>
               </div>
               <input
                 type="range"
@@ -267,8 +269,8 @@ export default function Page() {
               />
               <div className="flex justify-between text-xs text-slate-500">
                 <span>1 rok</span>
-                <span>15 rokov</span>
-                <span>30 rokov</span>
+                <span>15 let</span>
+                <span>30 let</span>
               </div>
             </div>
           </div>
@@ -279,7 +281,7 @@ export default function Page() {
             {/* VOO */}
             <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-5 relative overflow-hidden flex flex-col justify-between">
               <div className="absolute top-0 right-0 bg-slate-800 text-slate-300 text-xs px-2.5 py-1 rounded-bl-lg font-mono">
-                TER: 0.03%
+                TER: 0,03 %
               </div>
               <div>
                 <h3 className="font-bold text-lg text-white mb-1">Vanguard VOO</h3>
@@ -287,15 +289,15 @@ export default function Page() {
                 
                 <div className="space-y-2 mb-6">
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Vložené celkom:</span>
+                    <span>Celkem investováno:</span>
                     <span className="font-medium text-slate-300">{voo.totalInvested.toLocaleString()} CZK</span>
                   </div>
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Čistý zisk (oslobodené od dane):</span>
+                    <span>Čistý zisk (osvobozeno od daně):</span>
                     <span className="font-medium text-emerald-400">+{voo.netProfit.toLocaleString()} CZK</span>
                   </div>
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Ročná úspora vďaka W-8BEN:</span>
+                    <span>Roční úspora díky W-8BEN:</span>
                     <span className="font-medium text-emerald-300">
                       +{voo.w8benAnnualSavings.toLocaleString()} CZK/rok
                     </span>
@@ -304,7 +306,7 @@ export default function Page() {
               </div>
 
               <div className="pt-4 border-t border-slate-800/80">
-                <div className="text-xs text-slate-400">Celková hodnota portfolio:</div>
+                <div className="text-xs text-slate-400">Celková hodnota portfolia:</div>
                 <div className="text-xl font-extrabold text-white">{voo.finalAmount.toLocaleString()} CZK</div>
               </div>
             </div>
@@ -312,7 +314,7 @@ export default function Page() {
             {/* QQQ */}
             <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-5 relative overflow-hidden flex flex-col justify-between">
               <div className="absolute top-0 right-0 bg-slate-800 text-slate-300 text-xs px-2.5 py-1 rounded-bl-lg font-mono">
-                TER: 0.20%
+                TER: 0,20 %
               </div>
               <div>
                 <h3 className="font-bold text-lg text-white mb-1">Invesco QQQ</h3>
@@ -320,15 +322,15 @@ export default function Page() {
                 
                 <div className="space-y-2 mb-6">
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Vložené celkom:</span>
+                    <span>Celkem investováno:</span>
                     <span className="font-medium text-slate-300">{qqq.totalInvested.toLocaleString()} CZK</span>
                   </div>
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Čistý zisk (oslobodené od dane):</span>
+                    <span>Čistý zisk (osvobozeno od daně):</span>
                     <span className="font-medium text-emerald-400">+{qqq.netProfit.toLocaleString()} CZK</span>
                   </div>
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Ročná úspora vďaka W-8BEN:</span>
+                    <span>Roční úspora díky W-8BEN:</span>
                     <span className="font-medium text-emerald-300">
                       +{qqq.w8benAnnualSavings.toLocaleString()} CZK/rok
                     </span>
@@ -337,7 +339,7 @@ export default function Page() {
               </div>
 
               <div className="pt-4 border-t border-slate-800/80">
-                <div className="text-xs text-slate-400">Celková hodnota portfolio:</div>
+                <div className="text-xs text-slate-400">Celková hodnota portfolia:</div>
                 <div className="text-xl font-extrabold text-white">{qqq.finalAmount.toLocaleString()} CZK</div>
               </div>
             </div>
@@ -345,7 +347,7 @@ export default function Page() {
             {/* SCHD */}
             <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-5 relative overflow-hidden flex flex-col justify-between">
               <div className="absolute top-0 right-0 bg-slate-800 text-slate-300 text-xs px-2.5 py-1 rounded-bl-lg font-mono">
-                TER: 0.06%
+                TER: 0,06 %
               </div>
               <div>
                 <h3 className="font-bold text-lg text-white mb-1">Schwab SCHD</h3>
@@ -353,15 +355,15 @@ export default function Page() {
                 
                 <div className="space-y-2 mb-6">
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Vložené celkom:</span>
+                    <span>Celkem investováno:</span>
                     <span className="font-medium text-slate-300">{schd.totalInvested.toLocaleString()} CZK</span>
                   </div>
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Čistý zisk (oslobodené od dane):</span>
+                    <span>Čistý zisk (osvobozeno od daně):</span>
                     <span className="font-medium text-emerald-400">+{schd.netProfit.toLocaleString()} CZK</span>
                   </div>
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>Ročná úspora vďaka W-8BEN:</span>
+                    <span>Roční úspora díky W-8BEN:</span>
                     <span className="font-medium text-emerald-300">
                       +{schd.w8benAnnualSavings.toLocaleString()} CZK/rok
                     </span>
@@ -370,7 +372,7 @@ export default function Page() {
               </div>
 
               <div className="pt-4 border-t border-slate-800/80">
-                <div className="text-xs text-slate-400">Celková hodnota portfolio:</div>
+                <div className="text-xs text-slate-400">Celková hodnota portfolia:</div>
                 <div className="text-xl font-extrabold text-white">{schd.finalAmount.toLocaleString()} CZK</div>
               </div>
             </div>
@@ -393,10 +395,10 @@ export default function Page() {
               </div>
 
               <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
-                Stiahnite si kompletné PDF porovnanie + Excel kalkulačku zdaňovania
+                Stáhněte si kompletní PDF srovnání + Excel kalkulačku zdanění
               </h3>
               <p className="text-slate-300 text-sm sm:text-base mb-8 max-w-xl mx-auto">
-                Získajte detailný manuál pre správne vyplnenie formulára W-8BEN, podrobné srovnanie nákladov a prehľad legislatívy pre rok 2026.
+                Získejte detailní návod na správné vyplnění formuláře W-8BEN, podrobné srovnání nákladů a přehled legislativy pro rok 2026.
               </p>
 
               <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
@@ -404,7 +406,7 @@ export default function Page() {
                   <input
                     type="email"
                     required
-                    placeholder="Váš e-mail (napr. jan@primlad.cz)"
+                    placeholder="Váš e-mail (např. jan@primlad.cz)"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onFocus={handleFormStart}
@@ -414,11 +416,11 @@ export default function Page() {
                     type="submit"
                     className="px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition-all shadow-lg shadow-emerald-500/25 text-sm whitespace-nowrap cursor-pointer"
                   >
-                    Získať porovnanie zadarmo
+                    Získat srovnání zdarma
                   </button>
                 </div>
                 <p className="text-xs text-slate-400">
-                  Žiadny spam. Iba PDF prehľad a Excel kalkulačka. Odhlásiť sa môžete kedykoľvek.
+                  Žádný spam. Jen PDF shrnutí a Excel kalkulačka. Odhlásit se můžete kdykoliv.
                 </p>
               </form>
             </>
@@ -429,19 +431,19 @@ export default function Page() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-white">Skvelé, materiály sú pripravené!</h3>
+              <h3 className="text-2xl font-bold text-white">Skvělé, materiály jsou připravené!</h3>
               <p className="text-slate-300 text-sm max-w-md mx-auto">
-                Odkaz na stiahnutie PDF a Excel kalkulačky sme odoslali na adresu <span className="text-emerald-400 font-medium">{email}</span>.
+                Odkaz ke stažení PDF a Excel kalkulačky jsme odeslali na adresu <span className="text-emerald-400 font-medium">{email}</span>.
               </p>
               <div className="pt-4">
                 <button 
-                  onClick={() => alert('Simulácia: Sťahovanie PDF a Excelu spustené...')}
+                  onClick={() => alert('Simulace: Stahování PDF a Excelu spuštěno...')}
                   className="px-8 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition-all shadow-lg shadow-emerald-500/25 text-sm inline-flex items-center gap-2 cursor-pointer"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  Stiahnuť PDF ihned
+                  Stáhnout PDF ihned
                 </button>
               </div>
             </div>
@@ -454,22 +456,22 @@ export default function Page() {
       <footer className="border-t border-slate-800/80 bg-slate-950 py-8 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-400">
         <div className="max-w-5xl mx-auto space-y-3">
           <p>
-            Zdroje dát: SEC Filings (Form 10-K), Yahoo Finance. Údaje majú iba informatívny charakter.
+            Zdroj dat: SEC Filings (Form 10-K), Yahoo Finance. Údaje slouží pouze pro informaci.
           </p>
           <p className="text-slate-400">
-            Upozornenie: Nie je investičným odporučením. Investovanie do cenných papierov prináša riziko straty kapitálu. Minulé výnosy nie sú zárukou budúcich výsledkov.
+            Upozornění: Nejde o investiční doporučení. Investování do cenných papírů je spojeno s rizikem ztráty kapitálu. Minulé výnosy nejsou zárukou budoucích výsledků.
           </p>
-          {/* Podrobná poznámka k výpočtom podľa legislatívy ČR/SR */}
+          {/* Podrobná poznámka k výpočtům podle legislativy ČR/SR */}
           <div className="text-[11px] text-slate-500 mt-2 mb-0 space-y-1">
             <div>
-              Metodika výpočtu: Kapitálový zisk je oslobodený od dane z príjmov (0 %) na základe splnenia 3-ročného časového testu pre cenné papiere v ČR/SR.
+              Metodika výpočtu: Kapitálový zisk je osvobozen od daně z příjmů (0 %) na základě splnění 3letého časového testu pro cenné papíry v ČR/SR.
             </div>
             <div>
-              Úspora na dani z dividend (W-8BEN): Vyjadruje ročný rozdiel medzi 35 % zrážkovou daňou (bez W-8BEN) a 15 % zmluvnou daňou (s W-8BEN).
+              Úspora na dani z dividend (W-8BEN): Udává roční rozdíl mezi 35% srážkovou daní (bez W-8BEN) a 15% smluvní daní (s W-8BEN).
             </div>
           </div>
           <p className="pt-2 text-slate-400">
-            © 2026 ETF Porovnávač. Všetky práva vyhradené.
+            © 2026 ETF Srovnávač. Všechna práva vyhrazena.
           </p>
         </div>
       </footer>
